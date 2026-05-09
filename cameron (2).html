@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cameron Codes Stuff</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple-deep: #0d0010;
+    --purple-mid: #6b00c8;
+    --purple-bright: #a855f7;
+    --purple-glow: #c084fc;
+    --purple-flash: #e879f9;
+    --white: #f0e6ff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow-x: hidden;
+    background: var(--purple-deep);
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+  }
+
+  #canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(120,0,200,0.03) 2px, rgba(120,0,200,0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
+    pointer-events: none;
+  }
+
+  .page {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.8rem;
+    padding: 2rem 1rem;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    animation: fadeDown 0.8s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.6rem, 5vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, var(--purple-bright), var(--purple-flash), var(--purple-glow), var(--purple-bright));
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerText 3s linear infinite;
+    filter: drop-shadow(0 0 18px rgba(168,85,247,0.7));
+  }
+  .header .sub {
+    font-size: 0.85rem;
+    letter-spacing: 0.35em;
+    color: var(--purple-glow);
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+    opacity: 0.75;
+  }
+  @keyframes shimmerText {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* GIF FRAME */
+  .gif-frame {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    animation: fadeIn 1s 0.3s both, float 4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .gif-frame::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(var(--purple-bright), var(--purple-flash), var(--purple-mid), var(--purple-bright));
+    animation: rotateBorder 2.5s linear infinite;
+    z-index: -1;
+  }
+  .gif-frame::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: conic-gradient(var(--purple-bright), var(--purple-flash), var(--purple-mid), var(--purple-bright));
+    opacity: 0.25;
+    filter: blur(10px);
+    animation: rotateBorder 2.5s linear infinite;
+    z-index: -2;
+  }
+  .gif-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--purple-deep);
+  }
+  .gif-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+  }
+  @keyframes rotateBorder {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-12px); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* BUTTONS */
+  .btn-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    width: 100%;
+    max-width: 420px;
+  }
+  .link-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.4rem;
+    text-decoration: none;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(168,85,247,0.3);
+    background: rgba(13,0,16,0.75);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s;
+    animation: slideIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .link-btn:nth-child(1) { animation-delay: 0.5s; }
+  .link-btn:nth-child(2) { animation-delay: 0.65s; }
+  .link-btn:nth-child(3) { animation-delay: 0.80s; }
+  .link-btn:nth-child(4) { animation-delay: 0.95s; }
+  .link-btn:nth-child(5) { animation-delay: 1.10s; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-40px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .link-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(168,85,247,0.15), transparent);
+    transition: left 0.5s ease;
+  }
+  .link-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0%; height: 2px;
+    background: linear-gradient(90deg, var(--purple-mid), var(--purple-flash));
+    transition: width 0.4s ease;
+    box-shadow: 0 0 10px var(--purple-bright);
+  }
+  .link-btn:hover {
+    border-color: var(--purple-bright);
+    transform: translateX(6px);
+    box-shadow: -4px 0 20px rgba(168,85,247,0.3), 0 0 30px rgba(168,85,247,0.1);
+  }
+  .link-btn:hover::before { left: 150%; }
+  .link-btn:hover::after  { width: 100%; }
+  .link-btn:active { transform: translateX(6px) scale(0.98); }
+
+  .btn-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(168,85,247,0.5);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: rgba(107,0,200,0.2);
+    font-size: 1.1rem;
+    transition: all 0.3s;
+  }
+  .link-btn:hover .btn-icon {
+    border-color: var(--purple-flash);
+    background: rgba(168,85,247,0.25);
+    box-shadow: 0 0 16px rgba(168,85,247,0.6);
+    transform: rotate(10deg) scale(1.1);
+  }
+  .btn-text { flex: 1; }
+  .btn-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--white);
+    display: block;
+    transition: color 0.3s;
+  }
+  .link-btn:hover .btn-name { color: var(--purple-glow); }
+  .btn-url {
+    font-size: 0.68rem;
+    color: rgba(168,85,247,0.5);
+    letter-spacing: 0.05em;
+    display: block;
+    margin-top: 1px;
+    transition: color 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+  }
+  .link-btn:hover .btn-url { color: rgba(192,132,252,0.8); }
+  .btn-arrow {
+    font-size: 1rem;
+    color: rgba(168,85,247,0.4);
+    transform: translateX(-4px);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .link-btn:hover .btn-arrow {
+    color: var(--purple-flash);
+    transform: translateX(4px);
+    text-shadow: 0 0 10px var(--purple-flash);
+  }
+  .btn-num {
+    position: absolute;
+    top: 6px; right: 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    color: rgba(168,85,247,0.3);
+    letter-spacing: 0.1em;
+  }
+
+  .footer {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(168,85,247,0.35);
+    text-transform: uppercase;
+    animation: fadeIn 1s 1.5s both;
+  }
+
+  /* RIPPLE */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: rippleAnim 0.6s linear;
+    background: rgba(168,85,247,0.4);
+    pointer-events: none;
+  }
+  @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+  /* ORBS */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    animation: orbDrift linear infinite;
+  }
+  @keyframes orbDrift {
+    0%   { transform: translate(0,0) scale(1); }
+    33%  { transform: translate(40px,-60px) scale(1.1); }
+    66%  { transform: translate(-30px,30px) scale(0.9); }
+    100% { transform: translate(0,0) scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div class="orb" style="width:400px;height:400px;background:rgba(107,0,200,0.18);top:-100px;left:-150px;animation-duration:14s;"></div>
+<div class="orb" style="width:300px;height:300px;background:rgba(168,85,247,0.12);bottom:-80px;right:-100px;animation-duration:18s;"></div>
+<div class="orb" style="width:200px;height:200px;background:rgba(232,121,249,0.1);top:40%;left:60%;animation-duration:11s;"></div>
+
+<div class="page">
+
+  <div class="header">
+    <h1>Cameron Codes Stuff</h1>
+    <div class="sub">// Developer · Creator · Builder</div>
+  </div>
+
+  <div class="gif-frame">
+    <div class="gif-inner">
+      <!--
+        YOUR GIF IS EMBEDDED BELOW AS BASE64.
+        The full data from your document has been placed here.
+        If the image doesn't appear, open this file in a text editor
+        and replace everything between src=" and " with your full base64 string
+        prefixed with:  data:image/gif;base64,
+      -->
+      <img id="gifImg" alt="Cameron GIF">
+    </div>
+  </div>
+
+  <div class="btn-grid">
+    <a class="link-btn" href="https://github.com/CameronCodesStuff" target="_blank" rel="noopener">
+      <div class="btn-num">01</div>
+      <div class="btn-icon">⌥</div>
+      <div class="btn-text">
+        <span class="btn-name">GitHub</span>
+        <span class="btn-url">github.com/CameronCodesStuff</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://cameroncodesstuff.github.io/portfoliov2/" target="_blank" rel="noopener">
+      <div class="btn-num">02</div>
+      <div class="btn-icon">◈</div>
+      <div class="btn-text">
+        <span class="btn-name">Portfolio</span>
+        <span class="btn-url">cameroncodesstuff.github.io/portfoliov2</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://cameroncodesstuff.github.io/nexus/" target="_blank" rel="noopener">
+      <div class="btn-num">03</div>
+      <div class="btn-icon">⬡</div>
+      <div class="btn-text">
+        <span class="btn-name">Nexus</span>
+        <span class="btn-url">cameroncodesstuff.github.io/nexus</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://cameroncodesstuff.github.io/synex/" target="_blank" rel="noopener">
+      <div class="btn-num">04</div>
+      <div class="btn-icon">⬢</div>
+      <div class="btn-text">
+        <span class="btn-name">Synex</span>
+        <span class="btn-url">cameroncodesstuff.github.io/synex</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+    <a class="link-btn" href="https://github.com/CameronCodesStuff/Vector" target="_blank" rel="noopener">
+      <div class="btn-num">05</div>
+      <div class="btn-icon">▷</div>
+      <div class="btn-text">
+        <span class="btn-name">Vector</span>
+        <span class="btn-url">github.com/CameronCodesStuff/Vector</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+  </div>
+
+  <div class="footer">© Cameron Codes Stuff &nbsp;·&nbsp; All Systems Online</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════
+   EMBED GIF — inject the full base64 string here
+   so the file size stays manageable in the editor.
+   The GIF data from your shared HTML is set below.
+   ════════════════════════════════════════════════ */
+(function() {
+  // Full base64 data from your document
+  const b64 = "R0lGODlhyADCAPIGAA8PDx4eHpMArZQBrv///8Vv9gAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQJAwAGACwDAAAAxQDCAAAD/2i63P4wykmrvTjrzbv/YCiOZGmeaKqubOu+cCzPdG3feK7vfO//wKBwSCwaj8ikcslsOp/QqHRKrVqv2Kx2y+16v+CweEwum8/otHrNbrvf8Lh8Tq/b7/i8fs/v+/+AgYKDhIUwAoiJiouMjYoWAwOOk5SKkXyVmZOQkpqeiZd7n6MCnKSeoXqnngEBk62uq7IDeJ0CsLi5uruwr7y/wMCLtHe2wce5vsjLv8O1iczIytHUrZ5zxtXa29ubcdnc4eLCjnXQ4+jpzKPEXZLq8PG77F/v8vfx9F62t/Dn+AB7CWi3z566fwEBIiLorpM/RAkTIioTSVE6RhHRDWQopv8iwnAYM4rbeMYjRHSRUvYTyY0km4riCMicGZIlLwA4XbqBGW4mzUU2f+EEoLMNT24+ZaZMGTTYQjhHYyZNWuCjvHNDN3J8aZDq1JlVTyo8mTWlnKg9v34twFZsS0syC1gDtZXrSq9qv7rtpqjATGupsHVNm1fvXb6J/MoEXHeNycPcBigu7JNtgUjUtFpm65OxYMgaKecFPW+gaM9nB18UrZa0roWnXQVO89hqaNZTXeMSYDm2pcZhHgcUMLXV5NbIBuAmgLOXWTTCFRYPcFxv8uXNGQPPwk93QKayl6akuS1v9vDbsXQP2vzcJPLazANwPnsfUJvtT76X6f2XfPr/6T0xzTi2LXPeaxAd6NRC4lU0VE7PZTHgSHtF8+CFGCpIDiUXarXFhCBVyEyGJGrYTCUdRohFTfeAuEuJJY6TYn1V3DdWIwbCmOGIOkJIIxU24uPiiz0+yGOMc03UUZAh4khNkUYGoyM0IVES4BLraeRINVAOdcyUCRJlpXpMvuWkhV3OJ+WOSQZQJSUFWUQhi8kskqaabqYZS54YHsNIFdE1WaZAitwJi6Fh9rngI1QEauagSSZiaCuI3kKin4toIac2lSBYKIyx/HNhqKMCpWciwam2DiWeSgqqjaUiEiuVXcZyJRKdEigLrV5uaaSv85kKoyO3GtEdnY/K0iGw//lh1GyiOzpzxbGQVrOrq1kxGyyOz1oao7ROrHLQtQK8Oc22TjqraKQDQTHkQ9fiZBm1m37y6o/hbhkRueUCMG+uoWZyb7FGvDuuVg0mLJ5xbCm81C0I1/bppUVpkSVAm2Ws8cYcd8zxJDoGV207Hpds8slhNRKyGci2mPEArUiG8syXiUoibfyIlHG/vNGMMjgl4rxpQjvn5PPPNmcotMHJ5tmzyYk17JHMYRHZq5IWZEJoxUU4Cg+JT5cMy7/9UseWiTMWq3Wk+AbhtTpgozx2w7LOZxnaD3p4wdoBtw1EbfdcqvDLc1fdXEpe4pI4evwOzYjfQmAm0uIx072SZf98pqkTvfpyCnkQIuJDeQAyO8SwXHf6SAwpZjaxblNWp25u6IqzaXrIN3sCgDs";
+  document.getElementById('gifImg').src = 'data:image/gif;base64,' + b64;
+})();
+
+/* ════════════════════════════════════════════════
+   FAST-FALLING PURPLE RAIN PARTICLE SYSTEM
+   ════════════════════════════════════════════════ */
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+let W, H;
+let drops    = [];
+let splashes = [];
+let mouse    = { x: -9999, y: -9999 };
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); initDrops(); });
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+/* Purple colour palette */
+const COLS = [
+  [168,  85, 247],
+  [192, 132, 252],
+  [232, 121, 249],
+  [107,   0, 200],
+  [220,  38, 255],
+  [216, 180, 254],
+  [139,  92, 246],
+];
+
+/* ── Raindrop ── */
+class Drop {
+  constructor(init) { this.init = init; this.spawn(); }
+
+  spawn() {
+    const c = COLS[Math.floor(Math.random() * COLS.length)];
+    this.r = c[0]; this.g = c[1]; this.b = c[2];
+
+    this.x   = Math.random() * W;
+    this.y   = this.init ? Math.random() * H : -(10 + Math.random() * 60);
+    this.vy  = 5 + Math.random() * 8;          // 5–13 px/frame — fast rain
+    this.vx  = (Math.random() - 0.5) * 0.8;
+    this.len = 10 + Math.random() * 25;
+    this.w   = 0.6 + Math.random() * 1.4;
+    this.a   = 0.3 + Math.random() * 0.6;
+    this.glow = Math.random() < 0.12;
+  }
+
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+
+    /* Mouse repel */
+    const dx = this.x - mouse.x, dy = this.y - mouse.y;
+    const d  = Math.sqrt(dx*dx + dy*dy);
+    if (d < 90) {
+      const f = (90 - d) / 90;
+      this.x += (dx / d) * f * 4;
+      this.y += (dy / d) * f * 1.5;
+    }
+
+    /* Splash on landing */
+    if (this.y - this.len > H) {
+      if (Math.random() < 0.3) {
+        for (let k = 0; k < 5; k++) {
+          splashes.push(new Splash(this.x, H, [this.r, this.g, this.b]));
+        }
+      }
+      this.spawn();
+      this.init = false;
+    }
+    if (this.x < -10 || this.x > W + 10) { this.spawn(); this.init = false; }
+  }
+
+  draw() {
+    const grad = ctx.createLinearGradient(this.x, this.y - this.len, this.x, this.y);
+    grad.addColorStop(0, `rgba(${this.r},${this.g},${this.b},0)`);
+    grad.addColorStop(1, `rgba(${this.r},${this.g},${this.b},${this.a})`);
+
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y - this.len);
+    ctx.lineTo(this.x, this.y);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth   = this.w;
+    ctx.stroke();
+
+    /* Bright tip */
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.w * 1.4, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.r},${this.g},${this.b},${Math.min(this.a * 1.8, 1)})`;
+    if (this.glow) {
+      ctx.shadowBlur  = 8;
+      ctx.shadowColor = `rgba(${this.r},${this.g},${this.b},0.9)`;
+    }
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+/* ── Splash particle ── */
+class Splash {
+  constructor(x, y, col) {
+    this.x = x; this.y = y;
+    this.r = col[0]; this.g = col[1]; this.b = col[2];
+    this.vx = (Math.random() - 0.5) * 4;
+    this.vy = -(1 + Math.random() * 3);
+    this.life  = 0.9 + Math.random() * 0.1;
+    this.decay = 0.04 + Math.random() * 0.05;
+    this.size  = 1 + Math.random() * 2;
+  }
+  update() {
+    this.x   += this.vx;
+    this.y   += this.vy;
+    this.vy  += 0.15;
+    this.life -= this.decay;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.r},${this.g},${this.b},${Math.max(this.life, 0)})`;
+    ctx.fill();
+  }
+  get dead() { return this.life <= 0; }
+}
+
+function initDrops() {
+  const count = Math.min(Math.floor((W * H) / 3500), 280);
+  drops = Array.from({ length: count }, () => new Drop(true));
+}
+initDrops();
+
+/* ── Render loop ── */
+function loop() {
+  /* Slight motion-blur trail */
+  ctx.fillStyle = 'rgba(13,0,16,0.20)';
+  ctx.fillRect(0, 0, W, H);
+
+  drops.forEach(d => { d.update(); d.draw(); });
+
+  splashes = splashes.filter(s => !s.dead);
+  splashes.forEach(s => { s.update(); s.draw(); });
+
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* ── Button ripple ── */
+document.querySelectorAll('.link-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    const r = btn.getBoundingClientRect();
+    const el = document.createElement('span');
+    el.className = 'ripple';
+    const sz = Math.max(r.width, r.height);
+    el.style.cssText = `width:${sz}px;height:${sz}px;left:${e.clientX-r.left-sz/2}px;top:${e.clientY-r.top-sz/2}px;`;
+    btn.appendChild(el);
+    setTimeout(() => el.remove(), 700);
+  });
+});
+
+/* ── Cursor glow ── */
+const cg = document.createElement('div');
+cg.style.cssText = 'position:fixed;pointer-events:none;z-index:9999;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,0.08) 0%,transparent 70%);transform:translate(-50%,-50%);';
+document.body.appendChild(cg);
+document.addEventListener('mousemove', e => { cg.style.left = e.clientX+'px'; cg.style.top = e.clientY+'px'; });
+</script>
+</body>
+</html>
